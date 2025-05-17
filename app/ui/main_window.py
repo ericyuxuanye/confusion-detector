@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtWidgets import (
     QApplication,
     QGridLayout,
@@ -15,24 +15,25 @@ from PyQt6.QtWidgets import (
     QWidget,
     QScrollArea,
 )
+from typing import Callable
 
 from app.recorder.recorder import capture_and_save
-
+from app.ui.circle_button import ConcentricCircleButton
 
 class RecordingWidget(QWidget):
-    def __init__(self, switch_to_visualization_callback: callable) -> None:
+    def __init__(self, switch_to_visualization_callback: Callable) -> None:
         super().__init__()
-        self.switch_to_visualization_callback: callable = switch_to_visualization_callback
+        self.switch_to_visualization_callback: Callable = switch_to_visualization_callback
 
         # Initialize UI components
-        self.start_button: QPushButton = QPushButton("Start Recording")
-        self.stop_button: QPushButton = QPushButton("Stop Recording")
-        self.stop_button.hide()  # Hide stop button initially
+        self.button: ConcentricCircleButton = ConcentricCircleButton("Start Recording")
+        self.recording = False
+        # self.stop_button: QPushButton = ConcentricCircleButton("Stop Recording")
+        # self.stop_button.hide()  # Hide stop button initially
 
         # Layout
         layout: QVBoxLayout = QVBoxLayout()
-        layout.addWidget(self.start_button)
-        layout.addWidget(self.stop_button)
+        layout.addWidget(self.button)
         self.setLayout(layout)
 
         # Timer for recording
@@ -44,31 +45,26 @@ class RecordingWidget(QWidget):
         self.recording_data: List[Tuple] = []  # List to store tuples from capture_and_save
 
         # Connect buttons
-        self.start_button.clicked.connect(self.start_recording)
-        self.stop_button.clicked.connect(self.stop_recording)
+        self.button.clicked.connect(self.update_state)
+        # self.stop_button.clicked.connect(self.stop_recording)
 
-    def start_recording(self) -> None:
+    def update_state(self) -> None:
         """
         Starts the recording process by showing the stop button,
         hiding the start button, and starting the timer.
         """
-        self.record_start_time = datetime.now()
-        self.start_button.hide()
-        self.stop_button.show()
-        self.recording_data = []  # Reset recording data
-        self.timer.start(1000)  # Call record_frame every 1000 ms (1 second)
-
-    def stop_recording(self) -> None:
-        """
-        Stops the recording process by hiding the stop button,
-        showing the start button, and stopping the timer.
-        """
-        self.timer.stop()
-        self.stop_button.hide()
-        self.start_button.show()
-
-        # Switch to visualization view
-        self.switch_to_visualization_callback(self.recording_data, self.record_start_time)
+        if not self.recording:
+            self.record_start_time = datetime.now()
+            # self.stop_button.show()
+            self.recording_data = []  # Reset recording data
+            self.timer.start(1000)  # Call record_frame every 1000 ms (1 second)
+            self.recording = True
+            self.button.setText("Stop Recording")
+            self.button.updateColor("#f15767", "#841a28")
+            self.button.update()
+        else:
+            self.timer.stop()
+            self.switch_to_visualization_callback(self.recording_data, self.record_start_time)
 
     def record_frame(self) -> None:
         """
@@ -80,7 +76,7 @@ class RecordingWidget(QWidget):
             self.recording_data.append(result)
         except Exception as e:
             print(f"Error during recording: {e}")
-            self.stop_recording()
+            self.update_state()
 
 
 class VisualizationWidget(QWidget):
