@@ -26,8 +26,6 @@ def main() -> None:
     script_dir = os.path.dirname(os.path.abspath(__file__))
     qss_file = os.path.join(script_dir, "nordic.qss")
 
-    print(qss_file)
-
     load_stylesheet(app, qss_file)
 
     # Create and show the main window
