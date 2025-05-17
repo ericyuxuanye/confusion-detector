@@ -2,9 +2,9 @@ import sys
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import (
     QApplication,
     QGridLayout,
     QLabel,
@@ -13,18 +13,16 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QVBoxLayout,
     QWidget,
+    QScrollArea,
 )
 
 from app.recorder.recorder import capture_and_save
-from PyQt5.QtWidgets import QScrollArea
 
 
 class RecordingWidget(QWidget):
     def __init__(self, switch_to_visualization_callback: callable) -> None:
         super().__init__()
-        self.switch_to_visualization_callback: callable = (
-            switch_to_visualization_callback
-        )
+        self.switch_to_visualization_callback: callable = switch_to_visualization_callback
 
         # Initialize UI components
         self.start_button: QPushButton = QPushButton("Start Recording")
@@ -43,9 +41,7 @@ class RecordingWidget(QWidget):
 
         # Recording state
         self.record_start_time: datetime | None = None
-        self.recording_data: List[Tuple] = (
-            []
-        )  # List to store tuples from capture_and_save
+        self.recording_data: List[Tuple] = []  # List to store tuples from capture_and_save
 
         # Connect buttons
         self.start_button.clicked.connect(self.start_recording)
@@ -72,9 +68,7 @@ class RecordingWidget(QWidget):
         self.start_button.show()
 
         # Switch to visualization view
-        self.switch_to_visualization_callback(
-            self.recording_data, self.record_start_time
-        )
+        self.switch_to_visualization_callback(self.recording_data, self.record_start_time)
 
     def record_frame(self) -> None:
         """
@@ -90,9 +84,7 @@ class RecordingWidget(QWidget):
 
 
 class VisualizationWidget(QWidget):
-    def __init__(
-        self, recording_data: List[Tuple], record_start_time: datetime
-    ) -> None:
+    def __init__(self, recording_data: List[Tuple], record_start_time: datetime) -> None:
         super().__init__()
 
         # Scroll area to enable scrolling
@@ -106,20 +98,18 @@ class VisualizationWidget(QWidget):
         for i, (screenshot, webcam_frame, timestamp) in enumerate(recording_data):
             # Calculate elapsed time
             elapsed_time: timedelta = timestamp - record_start_time
-            elapsed_str: str = str(
-                timedelta(seconds=elapsed_time.total_seconds())
-            ).split(".")[0]
+            elapsed_str: str = str(timedelta(seconds=elapsed_time.total_seconds())).split(".")[0]
 
             # Convert screenshot to QPixmap and scale it
             screenshot_image: QImage = QImage(
                 screenshot.data,
                 screenshot.shape[1],
                 screenshot.shape[0],
-                QImage.Format_RGB888,
+                QImage.Format.Format_RGB888,
             )
             screenshot_pixmap: QPixmap = QPixmap.fromImage(screenshot_image)
             screenshot_pixmap = screenshot_pixmap.scaled(
-                200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                200, 200, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
             )
 
             # Convert webcam frame to QPixmap and scale it
@@ -127,11 +117,11 @@ class VisualizationWidget(QWidget):
                 webcam_frame.data,
                 webcam_frame.shape[1],
                 webcam_frame.shape[0],
-                QImage.Format_BGR888,
+                QImage.Format.Format_BGR888,
             )
             webcam_pixmap: QPixmap = QPixmap.fromImage(webcam_image)
             webcam_pixmap = webcam_pixmap.scaled(
-                200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                200, 200, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
             )
 
             # Add screenshot and webcam frame side-by-side
@@ -166,20 +156,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
         # Recording view
-        self.recording_widget: RecordingWidget = RecordingWidget(
-            self.switch_to_visualization
-        )
+        self.recording_widget: RecordingWidget = RecordingWidget(self.switch_to_visualization)
         self.stacked_widget.addWidget(self.recording_widget)
 
-    def switch_to_visualization(
-        self, recording_data: List[Tuple], record_start_time: datetime
-    ) -> None:
+    def switch_to_visualization(self, recording_data: List[Tuple], record_start_time: datetime) -> None:
         """
         Switches to the visualization view after recording is stopped.
         """
-        visualization_widget: VisualizationWidget = VisualizationWidget(
-            recording_data, record_start_time
-        )
+        visualization_widget: VisualizationWidget = VisualizationWidget(recording_data, record_start_time)
         self.stacked_widget.addWidget(visualization_widget)
         self.stacked_widget.setCurrentWidget(visualization_widget)
 
@@ -188,4 +172,4 @@ if __name__ == "__main__":
     app: QApplication = QApplication(sys.argv)
     window: MainWindow = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
