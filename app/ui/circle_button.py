@@ -151,11 +151,11 @@ class ConcentricCircleButton(QPushButton):
             currentButtonFaceColor = currentButtonFaceColor.lighter(110)
         
         # 1. Subtle static background glow (optional, can be removed if too busy)
-        static_glow_radius = diameter * self.ring_max_radius_factor * 1.05 # Slightly larger than max animated
-        painter.setPen(QPen(self.outerGlowHintColor, diameter * 0.04, Qt.PenStyle.SolidLine))
-        painter.setBrush(Qt.BrushStyle.NoBrush)
-        painter.drawEllipse(QRectF(center_x - static_glow_radius, center_y - static_glow_radius,
-                                   2 * static_glow_radius, 2 * static_glow_radius))
+        # static_glow_radius = diameter * self.ring_max_radius_factor * 1.05 # Slightly larger than max animated
+        # painter.setPen(QPen(self.outerGlowHintColor, diameter * 0.04, Qt.PenStyle.SolidLine))
+        # painter.setBrush(Qt.BrushStyle.NoBrush)
+        # painter.drawEllipse(QRectF(center_x - static_glow_radius, center_y - static_glow_radius,
+        #                            2 * static_glow_radius, 2 * static_glow_radius))
 
         # 2. Draw the ANIMATED rings
         for ring_data in self.animated_rings_data:
