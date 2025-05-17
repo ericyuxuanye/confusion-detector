@@ -1,0 +1,113 @@
+import numpy as np
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+
+class ConfusionWidget(QWidget):
+    def __init__(
+        self, image: np.ndarray, elapsed_time: str, confusion_score: float
+    ) -> None:
+        """
+        A widget that displays an image, elapsed time, and a confusion score as a progress bar.
+
+        Args:
+            image (np.ndarray): The image to display (in RGB format).
+            elapsed_time (str): The elapsed time as a formatted string (e.g., "00:01:23").
+            confusion_score (float): The confusion score as a percentage (0 to 100).
+        """
+        super().__init__()
+
+        # Set fixed size for the widget
+        self.setFixedSize(220, 300)
+
+        # Set background color, border, and rounded corners for the entire widget
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #3B4252;  /* Nordic dark gray */
+                border: 1px solid #4C566A;  /* Nordic border gray */
+                border-radius: 10px;
+            }
+        """
+        )
+
+        # Convert the image to QPixmap
+        image_qimage: QImage = QImage(
+            image.data, image.shape[1], image.shape[0], QImage.Format.Format_RGB888
+        )
+        image_pixmap: QPixmap = QPixmap.fromImage(image_qimage)
+        image_pixmap = image_pixmap.scaled(
+            200,
+            150,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+
+        # Image label (thumbnail)
+        self.image_label: QLabel = QLabel()
+        self.image_label.setPixmap(image_pixmap)
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Confusion score progress bar
+        self.confusion_bar: QProgressBar = QProgressBar()
+        self.confusion_bar.setValue(int(confusion_score))
+        self.confusion_bar.setTextVisible(False)
+        self.confusion_bar.setStyleSheet(
+            """
+            QProgressBar {
+                border: none;
+                border-radius: 5px;
+                background-color: #4C566A;  /* Nordic gray */
+            }
+            QProgressBar::chunk {
+                background-color: #BF616A;  /* Nordic red */
+                border-radius: 5px;
+            }
+        """
+        )
+
+        # Elapsed time label
+        self.elapsed_time_label: QLabel = QLabel(f"{elapsed_time}")
+        self.elapsed_time_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.elapsed_time_label.setStyleSheet("color: #D8DEE9;")  # Nordic light gray
+
+        # Full-screen button
+        self.fullscreen_button: QPushButton = QPushButton("⛶")  # Full-screen icon
+        self.fullscreen_button.setFixedSize(30, 30)
+        self.fullscreen_button.setStyleSheet(
+            """
+            QPushButton {
+                font-size: 16px;
+                background-color: #4C566A;  /* Nordic gray */
+                border: none;
+                border-radius: 5px;
+                color: #D8DEE9;  /* Nordic light gray */
+            }
+            QPushButton:hover {
+                background-color: #5E81AC;  /* Nordic blue */
+            }
+        """
+        )
+
+        # Layout for timestamp and full-screen button
+        bottom_layout: QHBoxLayout = QHBoxLayout()
+        bottom_layout.addWidget(self.elapsed_time_label)
+        bottom_layout.addWidget(self.fullscreen_button)
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Main layout
+        main_layout: QVBoxLayout = QVBoxLayout()
+        main_layout.addWidget(self.image_label)
+        main_layout.addWidget(self.confusion_bar)
+        main_layout.addLayout(bottom_layout)
+        main_layout.setContentsMargins(10, 10, 10, 10)  # Add padding inside the widget
+
+        self.setLayout(main_layout)
