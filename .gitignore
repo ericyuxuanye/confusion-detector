@@ -182,3 +182,5 @@ cython_debug/
 
 # directory for storing screenshots and webcam frames
 captures
+
+.DS_Store

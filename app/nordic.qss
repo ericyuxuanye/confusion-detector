@@ -1,0 +1,566 @@
+/* Nordic Theme QSS - Dark Variant */
+
+/* Nord Palette (from _nord.scss)
+    $nord0: #2e3440; (Polar Night - darkest)
+    $nord1: #3b4252;
+    $nord2: #434c5e;
+    $nord3: #4c566a; (Polar Night - lightest, good for borders, disabled text)
+    $nord4: #d8dee9; (Snow Storm - dark, general text)
+    $nord5: #e5e9f0;
+    $nord6: #eceff4; (Snow Storm - lightest, text on dark selections)
+    $nord7: #8fbcbb; (Frost - cyan/greenish)
+    $nord8: #88c0d0; (Frost - blue, primary accent)
+    $nord9: #81a1c1; (Frost - blue)
+    $nord10: #5e81ac; (Frost - darker blue, links)
+    $nord11: #bf616a; (Aurora - red, errors)
+    $nord12: #d08770; (Aurora - orange)
+    $nord13: #ebcb8b; (Aurora - yellow, warnings)
+    $nord14: #a3be8c; (Aurora - green, success)
+    $nord15: #b48ead; (Aurora - purple)
+*/
+
+/* Global Settings */
+QWidget {
+    background-color: #2e3440; /* nord0 */
+    color: #d8dee9;            /* nord4 */
+    border: none;
+    font-family: "Segoe UI", Cantarell, "Open Sans", "Helvetica Neue", sans-serif; /* Example font stack */
+    font-size: 10pt;
+}
+
+/* Main Window */
+QMainWindow {
+    background-color: #2e3440; /* nord0 */
+}
+
+/* Labels */
+QLabel {
+    background-color: transparent;
+    color: #d8dee9; /* nord4 */
+}
+
+QLabel#errorLabel { /* Example of specific label styling */
+    color: #bf616a; /* nord11 */
+}
+
+QLabel#warningLabel {
+    color: #ebcb8b; /* nord13 */
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #434c5e; /* nord2 */
+    color: #eceff4;            /* nord6 */
+    border: 1px solid #4c566a; /* nord3 */
+    padding: 5px 10px;
+    border-radius: 4px;
+    min-width: 60px;
+}
+
+QPushButton:hover {
+    background-color: #4c566a; /* nord3 */
+    border-color: #88c0d0;     /* nord8 - accent for hover border */
+}
+
+QPushButton:pressed {
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440;            /* nord0 - text on accent */
+}
+
+QPushButton:disabled {
+    background-color: #3b4252; /* nord1 */
+    color: #4c566a;            /* nord3 - for disabled text */
+    border-color: #434c5e;     /* nord2 */
+}
+
+QPushButton#SpecialButton { /* Example for primary action buttons */
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440;            /* nord0 */
+    font-weight: bold;
+}
+
+QPushButton#SpecialButton:hover {
+    background-color: #81a1c1; /* nord9 */
+}
+
+QPushButton#SpecialButton:pressed {
+    background-color: #5e81ac; /* nord10 */
+}
+
+/* Line Edits, Text Edits, Spin Boxes */
+QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    border: 1px solid #4c566a; /* nord3 */
+    border-radius: 4px;
+    padding: 4px;
+    selection-background-color: #88c0d0; /* nord8 */
+    selection-color: #2e3440;           /* nord0 */
+}
+
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {
+    border-color: #88c0d0;     /* nord8 */
+}
+
+QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled {
+    background-color: #434c5e; /* nord2 */
+    color: #4c566a;            /* nord3 */
+}
+
+/* Combo Box */
+QComboBox {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    border: 1px solid #4c566a; /* nord3 */
+    border-radius: 4px;
+    padding: 4px;
+    min-width: 6em;
+}
+
+QComboBox:hover {
+    border-color: #88c0d0; /* nord8 */
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left-width: 1px;
+    border-left-color: #4c566a; /* nord3 */
+    border-left-style: solid;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    background-color: #434c5e; /* nord2 */
+}
+
+QComboBox::down-arrow {
+    image: url(:/qt-project.org/styles/commonstyle/images/standardbutton-down-arrow-16.png); /* Or use a custom SVG */
+    width: 10px;
+    height: 10px;
+}
+QComboBox::down-arrow:on { /* shift the arrow when popup is open */
+    top: 1px;
+    left: 1px;
+}
+
+QComboBox QAbstractItemView { /* Dropdown list style */
+    background-color: #3b4252; /* nord1 */
+    border: 1px solid #4c566a; /* nord3 */
+    selection-background-color: #88c0d0; /* nord8 */
+    selection-color: #2e3440;           /* nord0 */
+    color: #d8dee9;            /* nord4 */
+    outline: none; /* Remove focus rectangle on the dropdown */
+}
+
+/* ScrollBars */
+QScrollBar:horizontal {
+    border: none;
+    background: #2e3440; /* nord0 */
+    height: 12px;
+    margin: 0px 15px 0px 15px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #4c566a; /* nord3 */
+    min-width: 20px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #88c0d0; /* nord8 */
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    border: none;
+    background: none;
+    width: 15px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+QScrollBar::add-line:horizontal {
+    right: 0px;
+}
+QScrollBar::sub-line:horizontal {
+    left: 0px;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: #2e3440; /* nord0 */
+    width: 12px;
+    margin: 15px 0px 15px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #4c566a; /* nord3 */
+    min-height: 20px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #88c0d0; /* nord8 */
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 15px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::add-line:vertical {
+    bottom: 0px;
+}
+QScrollBar::sub-line:vertical {
+    top: 0px;
+}
+
+
+/* Menus */
+QMenuBar {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    spacing: 3px; /* spacing between menu bar items */
+}
+
+QMenuBar::item {
+    padding: 4px 8px;
+    background: transparent;
+    border-radius: 4px;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440;            /* nord0 */
+}
+
+QMenuBar::item:pressed {
+    background: #5e81ac;       /* nord10 */
+}
+
+QMenu {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    border: 1px solid #4c566a; /* nord3 - a bit lighter border for menus */
+    padding: 5px;
+}
+
+QMenu::item {
+    padding: 5px 20px 5px 20px;
+    min-width: 100px;
+}
+
+QMenu::item:selected {
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440;            /* nord0 */
+}
+QMenu::item:disabled {
+    color: #4c566a; /* nord3 */
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #4c566a; /* nord3 */
+    margin-left: 10px;
+    margin-right: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+/* ToolTips */
+QToolTip {
+    background-color: #4c566a; /* nord3 */
+    color: #eceff4;            /* nord6 */
+    border: 1px solid #2e3440; /* nord0 */
+    padding: 4px;
+    border-radius: 3px;
+    opacity: 220; /* make semi-transparent */
+}
+
+/* TabBar and TabWidget */
+QTabBar::tab {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    border: 1px solid #434c5e; /* nord2 */
+    border-bottom: none; /* to merge with the tab pane */
+    padding: 8px 16px;
+    margin-right: 2px; /* space between tabs */
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:hover {
+    background-color: #434c5e; /* nord2 */
+}
+
+QTabBar::tab:selected {
+    background-color: #2e3440; /* nord0 - same as QTabWidget pane for seamless look */
+    color: #88c0d0;            /* nord8 - accent color for selected tab text */
+    border-color: #4c566a;     /* nord3 */
+    border-bottom: 1px solid #2e3440; /* Make bottom border same as pane */
+}
+
+QTabWidget::pane {
+    background-color: #2e3440; /* nord0 */
+    border: 1px solid #4c566a; /* nord3 */
+    border-top: none; /* Top border is handled by the QTabBar */
+}
+
+/* TreeView, ListView, TableView */
+QTreeView, QListView, QTableView {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9;            /* nord4 */
+    border: 1px solid #4c566a; /* nord3 */
+    alternate-background-color: #434c5e; /* nord2 - for alternating row colors */
+    selection-background-color: #88c0d0; /* nord8 */
+    selection-color: #2e3440;           /* nord0 */
+    gridline-color: #434c5e;   /* nord2 */
+}
+
+QTreeView::item:hover, QListView::item:hover, QTableView::item:hover {
+    background-color: #4c566a; /* nord3 */
+    color: #eceff4; /* nord6 */
+}
+
+QTreeView::item:selected, QListView::item:selected, QTableView::item:selected {
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440; /* nord0 */
+}
+
+QHeaderView::section {
+    background-color: #434c5e; /* nord2 */
+    color: #eceff4;            /* nord6 */
+    padding: 4px;
+    border: 1px solid #3b4252; /* nord1 */
+    font-weight: bold;
+}
+QHeaderView::section:hover {
+    background-color: #4c566a; /* nord3 */
+}
+
+/* CheckBox and RadioButton */
+QCheckBox, QRadioButton {
+    background-color: transparent;
+    color: #d8dee9; /* nord4 */
+    spacing: 5px;
+    padding: 2px;
+}
+
+QCheckBox::indicator, QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #81a1c1; /* nord9 */
+    border-radius: 3px; /* For checkbox, radio will be more rounded below */
+    background-color: #3b4252; /* nord1 */
+}
+QRadioButton::indicator {
+    border-radius: 9px; /* Make it round */
+}
+
+QCheckBox::indicator:hover, QRadioButton::indicator:hover {
+    border-color: #88c0d0; /* nord8 */
+}
+
+QCheckBox::indicator:checked, QRadioButton::indicator:checked {
+    background-color: #88c0d0; /* nord8 */
+    border-color: #81a1c1; /* nord9 */
+    image: url(:/qt-project.org/styles/commonstyle/images/checkbox-checked-16.png); /* Example for checkbox, needs a dark-theme friendly checkmark or use SVG */
+}
+QRadioButton::indicator:checked {
+     image: url(:/qt-project.org/styles/commonstyle/images/radiobutton-checked-16.png); /* Needs a dark-theme friendly radio dot */
+}
+QCheckBox::indicator:disabled, QRadioButton::indicator:disabled {
+    border-color: #434c5e; /* nord2 */
+    background-color: #2e3440; /* nord0 */
+}
+QCheckBox::indicator:checked:disabled, QRadioButton::indicator:checked:disabled {
+    background-color: #434c5e; /* nord2 */
+    image: none; /* Or a disabled checkmark/dot image */
+}
+
+
+/* GroupBox */
+QGroupBox {
+    background-color: #3b4252; /* nord1 */
+    border: 1px solid #4c566a; /* nord3 */
+    border-radius: 4px;
+    margin-top: 10px; /* make space for title */
+    padding: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px 0 5px;
+    left: 10px;
+    color: #88c0d0; /* nord8 - accent for title */
+    font-weight: bold;
+}
+
+/* Slider */
+QSlider::groove:horizontal {
+    border: 1px solid #434c5e; /* nord2 */
+    background: #434c5e;      /* nord2 */
+    height: 8px;
+    border-radius: 4px;
+}
+
+QSlider::handle:horizontal {
+    background: #88c0d0;       /* nord8 */
+    border: 1px solid #81a1c1; /* nord9 */
+    width: 16px;
+    margin: -4px 0; /* handle is centered on the groove */
+    border-radius: 8px;
+}
+QSlider::handle:horizontal:hover {
+    background: #8fbcbb; /* nord7 */
+    border-color: #88c0d0;
+}
+QSlider::handle:horizontal:pressed {
+    background: #5e81ac; /* nord10 */
+    border-color: #88c0d0;
+}
+
+QSlider::groove:vertical {
+    border: 1px solid #434c5e; /* nord2 */
+    background: #434c5e;      /* nord2 */
+    width: 8px;
+    border-radius: 4px;
+}
+
+QSlider::handle:vertical {
+    background: #88c0d0;       /* nord8 */
+    border: 1px solid #81a1c1; /* nord9 */
+    height: 16px;
+    margin: 0 -4px; /* handle is centered on the groove */
+    border-radius: 8px;
+}
+QSlider::handle:vertical:hover {
+    background: #8fbcbb; /* nord7 */
+    border-color: #88c0d0;
+}
+QSlider::handle:vertical:pressed {
+    background: #5e81ac; /* nord10 */
+    border-color: #88c0d0;
+}
+
+/* ProgressBar */
+QProgressBar {
+    border: 1px solid #4c566a; /* nord3 */
+    border-radius: 4px;
+    background-color: #3b4252; /* nord1 */
+    text-align: center;
+    color: #d8dee9; /* nord4 */
+    font-weight: bold;
+}
+
+QProgressBar::chunk {
+    background-color: #88c0d0; /* nord8 */
+    border-radius: 3px; /* Slightly smaller radius than the bar itself */
+    margin: 1px; /* Margin to not cover the border of the QProgressBar */
+}
+
+/* ToolBar */
+QToolBar {
+    background: #3b4252; /* nord1 */
+    border-bottom: 1px solid #2e3440; /* nord0 */
+    padding: 2px;
+    spacing: 3px;
+}
+
+QToolButton {
+    background-color: transparent;
+    color: #d8dee9; /* nord4 */
+    border: 1px solid transparent;
+    padding: 4px;
+    border-radius: 3px;
+}
+
+QToolButton:hover {
+    background-color: #4c566a; /* nord3 */
+    border: 1px solid #88c0d0; /* nord8 */
+}
+
+QToolButton:pressed {
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440; /* nord0 */
+}
+
+QToolButton[popupMode="1"] { /* if an arrow is present e.g. MenuButtonPopup */
+    padding-right: 20px; /* make space for the arrow */
+}
+
+QToolButton::menu-arrow {
+    image: url(:/qt-project.org/styles/commonstyle/images/standardbutton-down-arrow-16.png); /* Or custom SVG */
+    subcontrol-origin: padding;
+    subcontrol-position: right center;
+    width: 16px;
+}
+
+QToolBarExtension {
+    border: none;
+}
+QToolBarSeparator {
+    background: #4c566a; /* nord3 */
+    width: 1px;
+    margin: 0px 4px;
+}
+
+/* Status Bar */
+QStatusBar {
+    background-color: #3b4252; /* nord1 */
+    color: #d8dee9; /* nord4 */
+    border-top: 1px solid #2e3440; /* nord0 */
+}
+QStatusBar::item {
+    border: none; /* Do not draw borders for items */
+}
+
+/* Dialogs - generic styling, might need specific for QMessageBox */
+QDialog {
+    background-color: #2e3440; /* nord0 */
+}
+
+QDialogButtonBox {
+    /* Button styling is handled by QPushButton generally */
+}
+
+/* Calendar Widget */
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: #434c5e; /* nord2 */
+}
+
+QCalendarWidget QToolButton { /* For Prev/Next month buttons */
+    background-color: #434c5e; /* nord2 */
+    color: #eceff4;            /* nord6 */
+    border: 1px solid #3b4252; /* nord1 */
+    border-radius: 3px;
+    padding: 5px;
+    min-width: 20px;
+}
+QCalendarWidget QToolButton:hover {
+    background-color: #4c566a; /* nord3 */
+    border-color: #88c0d0;
+}
+QCalendarWidget QToolButton:pressed {
+    background-color: #88c0d0; /* nord8 */
+    color: #2e3440;
+}
+
+QCalendarWidget QAbstractItemView { /* The main day grid */
+    selection-background-color: #88c0d0; /* nord8 */
+    selection-color: #2e3440;           /* nord0 */
+    alternate-background-color: #434c5e; /* nord2 */
+}
+QCalendarWidget QWidget#qt_calendar_monthbutton,
+QCalendarWidget QWidget#qt_calendar_yearbutton {
+    color: #d8dee9; /* nord4 */
+    font-weight: bold;
+}
+QCalendarWidget QMenu { /* For month/year selection dropdowns */
+    background-color: #3b4252;
+    color: #d8dee9;
+    border: 1px solid #4c566a;
+}
+QCalendarWidget QMenu::item:selected {
+    background-color: #88c0d0;
+    color: #2e3440;
+}
