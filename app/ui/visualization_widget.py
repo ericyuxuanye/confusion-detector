@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QComboBox,
     QGridLayout,
     QHBoxLayout,
+    QLabel,
     QScrollArea,
     QVBoxLayout,
     QWidget,
@@ -19,6 +21,13 @@ class VisualizationWidget(QWidget):
         self, recording_data: List[Tuple], record_start_time: datetime, scores: List[float]
     ) -> None:
         super().__init__()
+
+        # --- Add a header/title label ---
+        header_label = QLabel("Lecture Slide Confusion Overview")
+        header_label.setStyleSheet(
+            "font-size: 22px; font-weight: bold; margin-bottom: 10px; text-align: center;"
+        )
+        header_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         # Scroll area to enable scrolling
         scroll_area: QScrollArea = QScrollArea()
@@ -50,6 +59,8 @@ class VisualizationWidget(QWidget):
 
         # Main layout
         main_layout: QVBoxLayout = QVBoxLayout()
+        main_layout.addWidget(header_label)  # Add the header at the top
+
         dropdown_layout: QHBoxLayout = QHBoxLayout()
         dropdown_layout.addWidget(self.sort_dropdown)
         dropdown_layout.setContentsMargins(0, 0, 0, 10)  # Add spacing below dropdown
