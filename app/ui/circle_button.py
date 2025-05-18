@@ -112,7 +112,7 @@ class ConcentricCircleButton(QPushButton):
         self.innerCircleColor = QColor(color)
         self.animatedRingColor = QColor(color)    # Base color for animated rings
         self.outerGlowHintColor = QColor(glowColor) # Very subtle static glow base
-        print(self.animation_timer.isActive())
+        # print(self.animation_timer.isActive())
         self.animation_timer.stop()
 
     def leaveEvent(self, event):

@@ -16,7 +16,7 @@ from app.ui.confusion_widget import ConfusionWidget
 
 class VisualizationWidget(QWidget):
     def __init__(
-        self, recording_data: List[Tuple], record_start_time: datetime
+        self, recording_data: List[Tuple], record_start_time: datetime, scores: List[float]
     ) -> None:
         super().__init__()
 
@@ -29,7 +29,7 @@ class VisualizationWidget(QWidget):
         self.layout: QGridLayout = QGridLayout()
 
         # Process the recording data into segments
-        self.processed_segments = process_recording_data(recording_data)
+        self.processed_segments = process_recording_data(recording_data, scores)
         self.record_start_time = record_start_time
 
         # Dropdown menu for sorting options
@@ -82,6 +82,7 @@ class VisualizationWidget(QWidget):
             elapsed_str: str = (
                 f"{str(elapsed_to_first).split('.')[0]}-{str(elapsed_to_last).split('.')[0]}"
             )
+            screenshot = screenshot[..., :3].copy()
 
             # Create a ConfusionWidget
             confusion_widget: ConfusionWidget = ConfusionWidget(

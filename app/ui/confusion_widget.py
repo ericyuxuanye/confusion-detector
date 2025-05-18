@@ -1,6 +1,6 @@
 import numpy as np
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QFont, QImage, QPixmap
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -29,6 +29,7 @@ class ConfusionWidget(QWidget):
 
         # Store the image and initialize chat history
         self.image = image
+        # self.image = np.transpose(image,(1,0,2)).copy()
         self.chat_history = (
             []
         )  # List to store chat messages (e.g., [("User", "Message")])
@@ -51,6 +52,7 @@ class ConfusionWidget(QWidget):
         image_qimage: QImage = QImage(
             image.data, image.shape[1], image.shape[0], QImage.Format.Format_RGB888
         )
+
         image_pixmap: QPixmap = QPixmap.fromImage(image_qimage)
         image_pixmap = image_pixmap.scaled(
             200,
@@ -69,16 +71,16 @@ class ConfusionWidget(QWidget):
         self.confusion_bar.setValue(int(confusion_score))
         self.confusion_bar.setTextVisible(False)
         self.confusion_bar.setStyleSheet(
-            """
-            QProgressBar {
+            f"""
+            QProgressBar {{
                 border: none;
                 border-radius: 5px;
                 background-color: #4C566A;  /* Nordic gray */
-            }
-            QProgressBar::chunk {
-                background-color: #BF616A;  /* Nordic red */
+            }}
+            QProgressBar::chunk {{
+                background: qlineargradient(x1:0 y1:0, x2:{100 / confusion_score} y2:0, stop:0 #72CCA3, stop:0.5 #C7B767, stop:1 #F07878);  /* Nordic red */
                 border-radius: 5px;
-            }
+            }}
         """
         )
 

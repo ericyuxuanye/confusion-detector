@@ -1,7 +1,10 @@
+# import multiprocessing as mp
+import os
+# if __name__ == "__main__":
+#     mp.set_start_method('spawn')
 import sys
 from PyQt6.QtWidgets import QApplication
 from app.ui.main_window import MainWindow
-import os
 
 def load_stylesheet(app_instance, qss_file_path):
     """Loads an external QSS file and applies it to the application."""
