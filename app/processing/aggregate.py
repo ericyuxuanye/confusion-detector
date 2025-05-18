@@ -1,7 +1,9 @@
-import numpy as np
-from typing import List, Tuple
-from datetime import datetime
 import random
+from datetime import datetime
+from typing import List, Tuple
+
+import cv2
+import numpy as np
 
 
 def process_recording_data(
@@ -27,13 +29,6 @@ def process_recording_data(
     if not recording_data:
         return []
 
-    # Helper function to compute mean squared error between two images
-    def mean_squared_error(img1: np.ndarray, img2: np.ndarray) -> float:
-        return np.mean((img1.astype("float") - img2.astype("float")) ** 2)
-
-    # Threshold for detecting slide changes (tune this value as needed)
-    mse_threshold = 1000.0
-
     # Partition the data into segments based on slide changes
     segments = []
     current_segment = [recording_data[0]]
@@ -42,10 +37,7 @@ def process_recording_data(
         prev_screenshot, _, _ = recording_data[i - 1]
         curr_screenshot, _, _ = recording_data[i]
 
-        # Compute MSE between consecutive screenshots
-        mse = mean_squared_error(prev_screenshot, curr_screenshot)
-
-        if mse > mse_threshold:
+        if not _are_frames_similar(prev_screenshot, curr_screenshot):
             # Slide change detected, start a new segment
             segments.append(current_segment)
             current_segment = [recording_data[i]]
@@ -75,3 +67,58 @@ def process_recording_data(
         )
 
     return result
+
+
+def apply_gaussian_blur(image: np.ndarray, kernel_size: int = 5) -> np.ndarray:
+    """
+    Applies Gaussian blurring to an image.
+
+    Args:
+        image (np.ndarray): The input image.
+        kernel_size (int): The size of the Gaussian kernel. Must be odd.
+
+    Returns:
+        np.ndarray: The blurred image.
+    """
+    return cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
+
+def _are_frames_similar_gaussian_blur(
+    frame1: np.ndarray,
+    frame2: np.ndarray,
+    threshold: float = 40.0**2,
+) -> bool:
+    """
+    Check if two frames are similar based on a threshold after applying Gaussian blur.
+
+    Args:
+        frame1 (np.ndarray): The first frame.
+        frame2 (np.ndarray): The second frame.
+        threshold (float): The similarity threshold.
+
+    Returns:
+        bool: True if the frames are similar, False otherwise.
+    """
+    # Helper function to compute mean squared error between two images
+    def mean_squared_error(img1: np.ndarray, img2: np.ndarray) -> float:
+        return np.mean((img1.astype("float") - img2.astype("float")) ** 2)
+
+    blurred_frame1 = apply_gaussian_blur(frame1)
+    blurred_frame2 = apply_gaussian_blur(frame2)
+    return mean_squared_error(blurred_frame1, blurred_frame2) < threshold
+
+def _are_frames_similar(
+    frame1: np.ndarray,
+    frame2: np.ndarray,
+) -> bool:
+    """
+    Check if two frames are similar based on a threshold.
+
+    Args:
+        frame1 (np.ndarray): The first frame.
+        frame2 (np.ndarray): The second frame.
+
+    Returns:
+        bool: True if the frames are similar, False otherwise.
+    """
+
+    return _are_frames_similar_gaussian_blur(frame1, frame2)
