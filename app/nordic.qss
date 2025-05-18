@@ -25,7 +25,7 @@ QWidget {
     color: #d8dee9;            /* nord4 */
     border: none;
     font-family: "Segoe UI", Cantarell, "Open Sans", "Helvetica Neue", sans-serif; /* Example font stack */
-    font-size: 10pt;
+    font-size: 14pt;
 }
 
 /* Main Window */
