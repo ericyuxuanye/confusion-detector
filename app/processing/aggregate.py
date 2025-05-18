@@ -1,10 +1,17 @@
 import random
 from datetime import datetime
 from typing import List, Tuple
+import pickle
 
 import cv2
 import numpy as np
+from feat import Detector
+import torch
 
+_detector = Detector()
+
+with open("svc_model.pkl", "rb") as f:
+    _model = pickle.load(f)
 
 def process_recording_data(
     recording_data: List[Tuple[np.ndarray, np.ndarray, datetime]],
@@ -56,7 +63,7 @@ def process_recording_data(
         last_screenshot, _, last_timestamp = segment[-1]
 
         # Generate random confusion scores for each webcam frame in the segment
-        confusion_scores = [random.uniform(0, 100) for _ in segment]
+        confusion_scores = _confusion_scores([frame for _, frame, _ in segment])
 
         # Compute the average confusion score for the segment
         avg_confusion_score = sum(confusion_scores) / len(confusion_scores)
@@ -122,3 +129,16 @@ def _are_frames_similar(
     """
 
     return _are_frames_similar_gaussian_blur(frame1, frame2)
+
+def _confusion_scores(frames: list[np.ndarray]) -> list[float]:
+    batch_size = 16
+    rgb_frames = []
+    for frame in frames:
+        rgb_frames.append(cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB))
+    tensor_bhwc = torch.from_numpy(np.array(rgb_frames))
+    print(tensor_bhwc.shape)
+    tensor_bchw = tensor_bhwc.permute(0, 3, 1, 2)
+    print("About to detect", flush=True)
+    res = _detector.detect(tensor_bchw, data_type="tensor", batch_size=batch_size)
+    features = res.aus.to_numpy()
+    return [feature * 100 for feature in _model.predict(features)]
