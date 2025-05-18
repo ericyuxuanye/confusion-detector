@@ -7,9 +7,12 @@ from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from app.recorder.recorder import capture_and_save
 from app.ui.circle_button import ConcentricCircleButton
 
+from app.processing.aggregate import confusion_score_wrapper
+import cv2
+
 
 class RecordingWidget(QWidget):
-    def __init__(self, switch_to_visualization_callback: Callable) -> None:
+    def __init__(self, switch_to_visualization_callback: Callable, pool, communicator) -> None:
         super().__init__()
         self.switch_to_visualization_callback: Callable = (
             switch_to_visualization_callback
@@ -18,7 +21,10 @@ class RecordingWidget(QWidget):
         # Initialize UI components
         self.button: ConcentricCircleButton = ConcentricCircleButton("Start Recording")
         self.recording = False
+        self.pool = pool
+        self.communicator = communicator
 
+        self.id = 0
         # Layout
         layout: QVBoxLayout = QVBoxLayout()
         layout.addWidget(self.button)
@@ -64,7 +70,16 @@ class RecordingWidget(QWidget):
         """
         try:
             result: Tuple = capture_and_save()
-            self.recording_data.append(result)
+            self.recording_data.append((result[0], result[2]))
+            # for the frame, we submit to the pool
+            frame = cv2.cvtColor(result[1], cv2.COLOR_BGR2RGB)
+            self.pool.apply_async(confusion_score_wrapper, (self.id, frame), callback=self.pool_callback_wrapper)
+            self.id += 1
         except Exception as e:
             print(f"Error during recording: {e}")
             self.update_state()
+
+    def pool_callback_wrapper(self, result: tuple[int, float]):
+        print(f"Got callback 1. result: {result}")
+        # id, confusion
+        self.communicator.data_ready.emit(result[0], result[1])

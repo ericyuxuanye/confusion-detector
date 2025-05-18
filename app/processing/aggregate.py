@@ -10,12 +10,14 @@ from feat import Detector
 
 _detector = Detector()
 
+_detector.detect(torch.zeros((1, 3, 50, 50)), data_type="tensor").agg
+
 with open("svc_model.pkl", "rb") as f:
     _model = pickle.load(f)
 
 
 def process_recording_data(
-    recording_data: List[Tuple[np.ndarray, np.ndarray, datetime]],
+    recording_data: List[Tuple[np.ndarray, datetime]], scores: list[float]
 ) -> List[Tuple[np.ndarray, float, datetime, datetime]]:
     """
     Processes the recording data to partition it into segments based on slide changes
@@ -37,7 +39,7 @@ def process_recording_data(
     if not recording_data:
         return []
 
-    confusion_scores = _confusion_scores([frame for _, frame, _ in recording_data])
+    confusion_scores = scores
 
     # Partition the data into segments based on slide changes
     segments = []
@@ -46,8 +48,8 @@ def process_recording_data(
     current_segment_scores = [confusion_scores[0]]
 
     for i in range(1, len(recording_data)):
-        prev_screenshot, _, _ = recording_data[i - 1]
-        curr_screenshot, _, _ = recording_data[i]
+        prev_screenshot, _ = recording_data[i - 1]
+        curr_screenshot, _ = recording_data[i]
 
         if not _are_frames_similar(prev_screenshot, curr_screenshot):
             # Slide change detected, start a new segment
@@ -68,8 +70,8 @@ def process_recording_data(
     # Compute the average confusion score for each segment
     result = []
     for segment, segment_scores in zip(segments, segment_score_lists):
-        first_screenshot, _, first_timestamp = segment[0]
-        last_screenshot, _, last_timestamp = segment[-1]
+        first_screenshot, first_timestamp = segment[0]
+        last_screenshot, last_timestamp = segment[-1]
 
         # Compute the average confusion score for the segment
         avg_confusion_score = sum(segment_scores) / len(segment_scores)
@@ -140,17 +142,27 @@ def _are_frames_similar(
     return _are_frames_similar_gaussian_blur(frame1, frame2)
 
 
-def _confusion_scores(frames: list[np.ndarray]) -> list[float]:
+def compute_confusion_scores(frames: list[np.ndarray]) -> list[float]:
     batch_size = 16
-    rgb_frames = []
-    for frame in frames:
-        rgb_frames.append(cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB))
-    tensor_bhwc = torch.from_numpy(np.array(rgb_frames))
+    # rgb_frames = []
+    # print("Before converting color")
+    # for frame in frames:
+    #     rgb_frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    # print("After converting color")
+    tensor_bhwc = torch.from_numpy(np.array(frames))
     print(tensor_bhwc.shape)
     tensor_bchw = tensor_bhwc.permute(0, 3, 1, 2)
+    print("After permutation")
     print("About to detect", flush=True)
     res = _detector.detect(tensor_bchw, data_type="tensor", batch_size=batch_size)
     features = res.aus.to_numpy()
     ret = [prob * 100 for _, prob in _model.predict_proba(features)]
     print(ret)
     return ret
+
+def confusion_score_wrapper(id, frame):
+    # print(f"Begin job, id: {id}, frame: {frame}")
+    # print(frame)
+    result = compute_confusion_scores([frame])
+    print(f"Finished in process: {id}, result: {result[0]}")
+    return id, result[0]
