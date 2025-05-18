@@ -3,7 +3,7 @@ import threading
 
 import requests
 from langchain_ollama import OllamaLLM
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSlot, QObject, pyqtSignal
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -13,6 +13,10 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+class ChatCommunicator(QObject):
+    token = pyqtSignal(str)
+    enabled = pyqtSignal(bool)
 
 
 class ChatWidget(QWidget):
@@ -29,7 +33,7 @@ class ChatWidget(QWidget):
         self.setStyleSheet(
             """
             QWidget {
-                background-color: #2E3440;  /* Nordic dark background */
+                background-color: rgb(28, 32, 40);  /* Nordic dark background */
                 color: #D8DEE9;  /* Nordic light gray */
             }
             QTextEdit, QLineEdit {
@@ -71,6 +75,9 @@ class ChatWidget(QWidget):
         # Send button
         self.send_button: QPushButton = QPushButton("Send")
         self.send_button.clicked.connect(self.handle_send_message)
+        self.communicator: ChatCommunicator = ChatCommunicator()
+        self.communicator.token.connect(self.update_chat)
+        self.communicator.enabled.connect(self.set_input_enabled)
 
         # Layout for input field and send button
         input_layout: QHBoxLayout = QHBoxLayout()
@@ -101,7 +108,7 @@ class ChatWidget(QWidget):
 
         # Add user message to chat history
         self.chat_data.append(("User", user_message))
-        self.chat_history.append(f"User: {user_message}")
+        self.chat_history.append(f"User: {user_message}\n\n")
 
         # Clear the input field
         self.input_field.clear()
@@ -114,15 +121,8 @@ class ChatWidget(QWidget):
             target=self.stream_response_in_background, args=(user_message,)
         ).start()
 
-    def stream_response_in_background(self, user_message: str) -> None:
-        """
-        Streams the response in the background and updates the chat history.
-
-        Args:
-            data (dict): The data to send in the POST request.
-        """
-
-        def update_chat(token: str) -> None:
+    @pyqtSlot(str)
+    def update_chat(self, token: str) -> None:
             """
             Updates the chat history with a streamed token.
 
@@ -135,15 +135,22 @@ class ChatWidget(QWidget):
             self.chat_history.setTextCursor(cursor)
             self.chat_history.ensureCursorVisible()
 
+    def stream_response_in_background(self, user_message: str) -> None:
+        """
+        Streams the response in the background and updates the chat history.
+
+        Args:
+            data (dict): The data to send in the POST request.
+        """
         # Add a placeholder for the assistant's response
 
         response_text = ""
-        self.chat_history.append("Assistant: ")
+        self.communicator.token.emit("Assistant: ")
 
         try:
             llm = OllamaLLM(model="llama3")
             for chunk in llm.stream(user_message):
-                update_chat(chunk)  # Update the chat history with the token
+                self.communicator.token.emit(chunk)  # Update the chat history with the token
                 response_text += chunk
 
         except Exception as e:
@@ -152,8 +159,10 @@ class ChatWidget(QWidget):
         finally:
             # Re-enable input after the response is complete
             self.chat_data.append(("Assistant", response_text))
-            self.set_input_enabled(True)
+            # self.set_input_enabled(True)
+            self.communicator.enabled.emit(True)
 
+    @pyqtSlot(bool)
     def set_input_enabled(self, enabled: bool) -> None:
         """
         Enables or disables the input field and send button.

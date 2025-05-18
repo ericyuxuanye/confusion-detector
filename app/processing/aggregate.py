@@ -74,7 +74,8 @@ def process_recording_data(
         last_screenshot, last_timestamp = segment[-1]
 
         # Compute the average confusion score for the segment
-        avg_confusion_score = sum(segment_scores) / len(segment_scores)
+        # avg_confusion_score = sum(segment_scores) / len(segment_scores)
+        avg_confusion_score = np.max(segment_scores)
 
         # Append the result for this segment
         result.append(
