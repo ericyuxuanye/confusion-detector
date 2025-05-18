@@ -4,6 +4,7 @@ from typing import List, Tuple
 from PyQt6.QtWidgets import QGridLayout, QScrollArea, QVBoxLayout, QWidget
 
 from app.ui.confusion_widget import ConfusionWidget
+from app.processing.aggregate import process_recording_data
 
 
 class VisualizationWidget(QWidget):
@@ -20,28 +21,33 @@ class VisualizationWidget(QWidget):
         content_widget: QWidget = QWidget()
         self.layout: QGridLayout = QGridLayout()
 
-        # Add confusion widgets to the grid layout
-        for i, (screenshot, _, timestamp) in enumerate(recording_data):
-            # Calculate elapsed time
-            elapsed_time: timedelta = timestamp - record_start_time
-            elapsed_str: str = str(
-                timedelta(seconds=elapsed_time.total_seconds())
-            ).split(".")[0]
+        # Process the recording data into segments
+        processed_segments = process_recording_data(recording_data)
+        print(len(processed_segments), "segments")
 
-            # Generate a dummy confusion score for now (replace with actual logic later)
-            # confusion_score: float = np.random.uniform(0, 100)
-            confusion_score: float = 69
+        # Add confusion widgets to the grid layout
+        for i, (
+            screenshot,
+            avg_confusion_score,
+            first_timestamp,
+            last_timestamp,
+        ) in enumerate(processed_segments):
+            # Calculate elapsed time strings
+            elapsed_to_first: timedelta = first_timestamp - record_start_time
+            elapsed_to_last: timedelta = last_timestamp - record_start_time
+            elapsed_str: str = (
+                f"{str(elapsed_to_first).split('.')[0]}-{str(elapsed_to_last).split('.')[0]}"
+            )
 
             # Create a ConfusionWidget
             confusion_widget: ConfusionWidget = ConfusionWidget(
-                screenshot, elapsed_str, confusion_score
+                screenshot, elapsed_str, avg_confusion_score
             )
+            
+            self.layout.addWidget(confusion_widget)
 
-            # Add the widget to the grid layout
-            self.layout.addWidget(
-                confusion_widget, i // 3, i % 3
-            )  # 3 widgets per row (default)
 
+        self._set_curr_layout()
         content_widget.setLayout(self.layout)
         scroll_area.setWidget(content_widget)
 
@@ -57,14 +63,24 @@ class VisualizationWidget(QWidget):
         super().resizeEvent(event)
         if self.layout.count() == 0:
             return
+        
+        self._set_curr_layout()
 
+    def _set_curr_layout(self) -> None:
         # Calculate the number of widgets per row based on the current window width
         widget_width: int = (
             220  # Approximate width of each ConfusionWidget (200px + padding)
         )
         num_columns: int = max(1, self.width() // widget_width)
+        # clear the layout
+        widgets: List[QWidget] = []
+        for i in reversed(range(self.layout.count())):
+            widget = self.layout.itemAt(i).widget()
+            if widget is not None:
+                widgets.append(widget)
+                self.layout.removeWidget(widget)
+                widget.setParent(None)
 
         # Rearrange widgets in the grid layout
-        for i in range(self.layout.count()):
-            widget = self.layout.itemAt(i).widget()
+        for i, widget in enumerate(reversed(widgets)):
             self.layout.addWidget(widget, i // num_columns, i % num_columns)
