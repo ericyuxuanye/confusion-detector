@@ -87,10 +87,8 @@ def capture_and_save() -> tuple[np.ndarray, np.ndarray]:
 
     # Capture screenshot
     screenshot = capture_screenshot()
-    save_image(screenshot, "screenshot", timestamp)
 
     # Capture webcam frame
     webcam_frame = capture_webcam_frame()
-    save_image(webcam_frame, "webcam", timestamp)
 
     return screenshot, webcam_frame, timestamp
