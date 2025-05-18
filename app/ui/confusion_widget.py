@@ -10,6 +10,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from app.ui.help_widget import HelpWidget
+
 
 class ConfusionWidget(QWidget):
     def __init__(
@@ -24,6 +26,12 @@ class ConfusionWidget(QWidget):
             confusion_score (float): The confusion score as a percentage (0 to 100).
         """
         super().__init__()
+
+        # Store the image and initialize chat history
+        self.image = image
+        self.chat_history = (
+            []
+        )  # List to store chat messages (e.g., [("User", "Message")])
 
         # Set fixed size for the widget
         self.setFixedSize(220, 300)
@@ -51,7 +59,7 @@ class ConfusionWidget(QWidget):
             Qt.TransformationMode.SmoothTransformation,
         )
 
-        # Image label (thumbnail)
+        # Image label
         self.image_label: QLabel = QLabel()
         self.image_label.setPixmap(image_pixmap)
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -79,8 +87,8 @@ class ConfusionWidget(QWidget):
         self.elapsed_time_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.elapsed_time_label.setStyleSheet("color: #D8DEE9;")  # Nordic light gray
 
-        # Full-screen button
-        self.fullscreen_button: QPushButton = QPushButton("⛶")  # Full-screen icon
+        # Fullscreen button
+        self.fullscreen_button: QPushButton = QPushButton("⛶")  # Fullscreen icon
         self.fullscreen_button.setFixedSize(30, 30)
         self.fullscreen_button.setStyleSheet(
             """
@@ -96,8 +104,9 @@ class ConfusionWidget(QWidget):
             }
         """
         )
+        self.fullscreen_button.clicked.connect(self.open_help_widget)
 
-        # Layout for timestamp and full-screen button
+        # Layout for timestamp and fullscreen button
         bottom_layout: QHBoxLayout = QHBoxLayout()
         bottom_layout.addWidget(self.elapsed_time_label)
         bottom_layout.addWidget(self.fullscreen_button)
@@ -111,3 +120,10 @@ class ConfusionWidget(QWidget):
         main_layout.setContentsMargins(10, 10, 10, 10)  # Add padding inside the widget
 
         self.setLayout(main_layout)
+
+    def open_help_widget(self) -> None:
+        """
+        Opens a HelpWidget with the stored image and chat history.
+        """
+        self.help_widget = HelpWidget(self.image, self.chat_history)
+        self.help_widget.show()
