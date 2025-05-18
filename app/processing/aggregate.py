@@ -1,17 +1,18 @@
+import pickle
 import random
 from datetime import datetime
 from typing import List, Tuple
-import pickle
 
 import cv2
 import numpy as np
-from feat import Detector
 import torch
+from feat import Detector
 
 _detector = Detector()
 
 with open("svc_model.pkl", "rb") as f:
     _model = pickle.load(f)
+
 
 def process_recording_data(
     recording_data: List[Tuple[np.ndarray, np.ndarray, datetime]],
@@ -36,9 +37,13 @@ def process_recording_data(
     if not recording_data:
         return []
 
+    confusion_scores = _confusion_scores([frame for _, frame, _ in recording_data])
+
     # Partition the data into segments based on slide changes
     segments = []
+    segment_score_lists = []
     current_segment = [recording_data[0]]
+    current_segment_scores = [confusion_scores[0]]
 
     for i in range(1, len(recording_data)):
         prev_screenshot, _, _ = recording_data[i - 1]
@@ -47,26 +52,27 @@ def process_recording_data(
         if not _are_frames_similar(prev_screenshot, curr_screenshot):
             # Slide change detected, start a new segment
             segments.append(current_segment)
+            segment_score_lists.append(current_segment_scores)
             current_segment = [recording_data[i]]
+            current_segment_scores = [confusion_scores[i]]
         else:
             # Add to the current segment
             current_segment.append(recording_data[i])
+            current_segment_scores.append(confusion_scores[i])
 
     # Add the last segment
     if current_segment:
         segments.append(current_segment)
+        segment_score_lists.append(current_segment_scores)
 
     # Compute the average confusion score for each segment
     result = []
-    for segment in segments:
+    for segment, segment_scores in zip(segments, segment_score_lists):
         first_screenshot, _, first_timestamp = segment[0]
         last_screenshot, _, last_timestamp = segment[-1]
 
-        # Generate random confusion scores for each webcam frame in the segment
-        confusion_scores = _confusion_scores([frame for _, frame, _ in segment])
-
         # Compute the average confusion score for the segment
-        avg_confusion_score = sum(confusion_scores) / len(confusion_scores)
+        avg_confusion_score = sum(segment_scores) / len(segment_scores)
 
         # Append the result for this segment
         result.append(
@@ -89,10 +95,11 @@ def apply_gaussian_blur(image: np.ndarray, kernel_size: int = 5) -> np.ndarray:
     """
     return cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
 
+
 def _are_frames_similar_gaussian_blur(
     frame1: np.ndarray,
     frame2: np.ndarray,
-    threshold: float = 40.0**2,
+    threshold: float = 30.0**2,
 ) -> bool:
     """
     Check if two frames are similar based on a threshold after applying Gaussian blur.
@@ -105,6 +112,7 @@ def _are_frames_similar_gaussian_blur(
     Returns:
         bool: True if the frames are similar, False otherwise.
     """
+
     # Helper function to compute mean squared error between two images
     def mean_squared_error(img1: np.ndarray, img2: np.ndarray) -> float:
         return np.mean((img1.astype("float") - img2.astype("float")) ** 2)
@@ -112,6 +120,7 @@ def _are_frames_similar_gaussian_blur(
     blurred_frame1 = apply_gaussian_blur(frame1)
     blurred_frame2 = apply_gaussian_blur(frame2)
     return mean_squared_error(blurred_frame1, blurred_frame2) < threshold
+
 
 def _are_frames_similar(
     frame1: np.ndarray,
@@ -130,6 +139,7 @@ def _are_frames_similar(
 
     return _are_frames_similar_gaussian_blur(frame1, frame2)
 
+
 def _confusion_scores(frames: list[np.ndarray]) -> list[float]:
     batch_size = 16
     rgb_frames = []
@@ -141,4 +151,6 @@ def _confusion_scores(frames: list[np.ndarray]) -> list[float]:
     print("About to detect", flush=True)
     res = _detector.detect(tensor_bchw, data_type="tensor", batch_size=batch_size)
     features = res.aus.to_numpy()
-    return [feature * 100 for feature in _model.predict(features)]
+    ret = [prob * 100 for _, prob in _model.predict_proba(features)]
+    print(ret)
+    return ret
