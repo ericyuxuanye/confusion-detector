@@ -27,7 +27,8 @@ def capture_webcam_frame() -> np.ndarray:
         np.ndarray: The webcam frame as a NumPy array in BGR format.
     """
     cap = cv2.VideoCapture(0)  # Open the default webcam
-    ret, frame = cap.read()
+    cap.grab()
+    ret, frame = cap.retrieve()
     cap.release()  # Release the webcam
     if not ret:
         raise RuntimeError("Failed to capture webcam frame.")
