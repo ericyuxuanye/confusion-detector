@@ -1,3 +1,8 @@
+import json
+import threading
+
+import requests
+from langchain_ollama import OllamaLLM
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QHBoxLayout,
@@ -8,6 +13,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from app.config import OLLAMA_API_ENDPOINT
 
 
 class ChatWidget(QWidget):
@@ -59,7 +66,9 @@ class ChatWidget(QWidget):
         # Input field for user messages
         self.input_field: QLineEdit = QLineEdit()
         self.input_field.setPlaceholderText("Type your message here...")
-        self.input_field.returnPressed.connect(self.handle_send_message)  # Handle "Enter" key
+        self.input_field.returnPressed.connect(
+            self.handle_send_message
+        )  # Handle "Enter" key
 
         # Send button
         self.send_button: QPushButton = QPushButton("Send")
@@ -78,10 +87,16 @@ class ChatWidget(QWidget):
 
         self.setLayout(main_layout)
 
+        # State to track whether a response is being generated
+        self.is_generating_response = False
+
     def handle_send_message(self) -> None:
         """
-        Handles sending a message and displaying a mock response.
+        Handles sending a message and streaming a response.
         """
+        if self.is_generating_response:
+            return  # Do nothing if a response is already being generated
+
         user_message = self.input_field.text().strip()  # Strip whitespace
         if not user_message:
             return  # Do nothing if the message is empty or only contains whitespace
@@ -90,10 +105,64 @@ class ChatWidget(QWidget):
         self.chat_data.append(("User", user_message))
         self.chat_history.append(f"User: {user_message}")
 
-        # Mock assistant response
-        assistant_response = "This is a mock response from the assistant."
-        self.chat_data.append(("Assistant", assistant_response))
-        self.chat_history.append(f"Assistant: {assistant_response}")
-
         # Clear the input field
         self.input_field.clear()
+
+        # Disable input while generating a response
+        self.set_input_enabled(False)
+
+        # Start a background thread to stream the response
+        threading.Thread(
+            target=self.stream_response_in_background, args=(user_message,)
+        ).start()
+
+    def stream_response_in_background(self, user_message: str) -> None:
+        """
+        Streams the response in the background and updates the chat history.
+
+        Args:
+            data (dict): The data to send in the POST request.
+        """
+
+        def update_chat(token: str) -> None:
+            """
+            Updates the chat history with a streamed token.
+
+            Args:
+                token (str): The token to append to the chat history.
+            """
+            cursor = self.chat_history.textCursor()
+            cursor.movePosition(cursor.MoveOperation.End)
+            cursor.insertText(token)
+            self.chat_history.setTextCursor(cursor)
+            self.chat_history.ensureCursorVisible()
+
+        # Add a placeholder for the assistant's response
+
+        response_text = ""
+        self.chat_history.append("Assistant: ")
+
+        try:
+            llm = OllamaLLM(model="llama3")
+            for chunk in llm.stream(user_message):
+                update_chat(chunk)  # Update the chat history with the token
+                response_text += chunk
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        finally:
+            # Re-enable input after the response is complete
+            self.chat_data.append(("Assistant", response_text))
+            self.set_input_enabled(True)
+
+    def set_input_enabled(self, enabled: bool) -> None:
+        """
+        Enables or disables the input field and send button.
+
+        Args:
+            enabled (bool): Whether to enable or disable the input.
+        """
+        self.input_field.setEnabled(enabled)
+        self.send_button.setEnabled(enabled)
+        self.is_generating_response = not enabled
