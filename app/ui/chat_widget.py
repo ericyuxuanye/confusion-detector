@@ -14,8 +14,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from app.config import OLLAMA_API_ENDPOINT
-
 
 class ChatWidget(QWidget):
     def __init__(self, chat_data: list) -> None:
